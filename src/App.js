@@ -323,7 +323,27 @@ export default function KnownDecoder(props) {
         </div>
         <div className="line" />
       </header>
-      <h3>Created by Michael Amadi</h3>
+      <h5>
+        Created by{" "}
+        <a
+          href="https://twitter.com/AmadiMichaels"
+          target="_blank"
+          rel="noreferrer"
+          style={{ textDecoration: "black 1px" }}
+        >
+          @AmadiMichaels{" "}
+        </a>
+        and open source{" "}
+        <a
+          href="https://github.com/AmadiMichaels/evm-data"
+          target="_blank"
+          rel="noreferrer"
+          style={{ textDecoration: "black 1px" }}
+        >
+          here
+        </a>
+      </h5>
+      <p />
       <h6> Don't trust, VERIFY!</h6>
 
       <h1> EVM Data Decoder </h1>
