@@ -186,6 +186,7 @@ export default function KnownDecoder(props) {
 
       console.log(decodedInfo);
       let r = Object.keys(decodedInfo);
+      console.log(r);
       let xxxxx = [];
       let f = {};
 
@@ -298,7 +299,11 @@ export default function KnownDecoder(props) {
                         ? params.baseName + "." + value.varName + " : "
                         : params.baseName + "[" + index + "]" + " : "}
                     </a>
-                    {value.value}
+                    {value.value === true || value.value === false ? (
+                      <> {value.value.toString()} </>
+                    ) : (
+                      <> {value.value} </>
+                    )}
                   </div>
                 )}
               </div>
@@ -343,7 +348,6 @@ export default function KnownDecoder(props) {
           here
         </a>
       </h5>
-      <p />
       <h6> Don't trust, VERIFY!</h6>
 
       <h1> EVM Data Decoder </h1>
@@ -549,7 +553,11 @@ export default function KnownDecoder(props) {
                               >
                                 {value.varName + " : "}
                               </a>
-                              {value.value}
+                              {value.value === true || value.value === false ? (
+                                <> {value.value.toString()} </>
+                              ) : (
+                                <> {value.value} </>
+                              )}
                             </div>
                           )}
                         </div>
@@ -708,7 +716,11 @@ export default function KnownDecoder(props) {
                               >
                                 {value.varName + " : "}
                               </a>
-                              {value.value}
+                              {value.value === true || value.value === false ? (
+                                <> {value.value.toString()} </>
+                              ) : (
+                                <> {value.value} </>
+                              )}
                             </div>
                           )}
                         </div>
