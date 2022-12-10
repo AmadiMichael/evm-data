@@ -7,6 +7,8 @@ import axios from "axios";
 import { InfuraProvider } from "@ethersproject/providers";
 import detectProxyTarget from "evm-proxy-detection";
 
+import { whatsabi } from "@shazow/whatsabi";
+
 const ETHERSCAN_APIKEY = process.env.REACT_APP_ETHERSCAN_APIKEY;
 const POLYGONSCAN_APIKEY = process.env.REACT_APP_POLYGONSCAN_APIKEY;
 const BSCSCAN_APIKEY = process.env.REACT_APP_BSCSCAN_APIKEY;
@@ -61,7 +63,7 @@ export async function getTokenDetails(
 ) {
   // Get the API Key, RPC provider and Api link prefix for the inputed network.
   const myApiKey = apiKeyArray[chainName].ApiKey;
-  const provider = apiKeyArray[chainName].Provider;
+  const provider = ethers.getDefaultProvider(apiKeyArray[chainName].Provider);
   const apiNetwork = apiKeyArray[chainName].ApiNetwork;
 
   //   Creating a wallet instance with your private key and chosen provider.
@@ -69,12 +71,8 @@ export async function getTokenDetails(
 
   //   Check that the inputed address is a valid address.
   if (ethers.utils.isAddress(tokenContractAddress)) {
-    if (
-      (await ethers
-        .getDefaultProvider(provider)
-        .getCode(tokenContractAddress)) == "0x"
-    )
-      throw Error("Address not a contract");
+    const code = await provider.getCode(tokenContractAddress);
+    if (code == "0x") throw Error("Address not a contract");
 
     const infuraProvider = new InfuraProvider(
       chainId,
@@ -93,10 +91,9 @@ export async function getTokenDetails(
     );
 
     if (addr) tokenContractAddress = addr;
-    console.log("x", addr);
-    console.log("y", tokenContractAddress);
 
     let contractABI;
+    let isWasabi = false;
     // Fetch the contract address's abi and connect wallet to it by creating a new Contract instance.
     try {
       let text = await axios(
@@ -104,33 +101,53 @@ export async function getTokenDetails(
         `,
         { credentials: "omit" }
       );
-      contractABI = JSON.parse(text.data.result);
-      let newContract = new ethers.Contract(
-        tokenContractAddress,
-        contractABI,
-        new ethers.VoidSigner(address, provider)
-      );
-      // If the contract is a proxy contract this will get the correct info.
-      try {
-        const implementationAddress = await newContract.implementation();
-        console.log("It is a proxy contract");
-        console.log(
-          "Implementation Contract Address: " + implementationAddress
-        );
 
-        let text = await axios(
-          `https://${apiNetwork}/api?module=contract&action=getabi&address=${implementationAddress}&apikey=${myApiKey}
-          `,
-          { credentials: "omit" }
+      let newContract;
+
+      if (text.data.status == 0) {
+        isWasabi = true;
+      } else {
+        contractABI = JSON.parse(text.data.result);
+        newContract = new ethers.Contract(
+          tokenContractAddress,
+          contractABI,
+          new ethers.VoidSigner(address, provider)
         );
-        contractABI = JSON.parse(text.result);
-      } catch (err) {
-        console.log(err.message);
-        console.log("Not a proxy contract");
+      }
+      // If the contract is a proxy contract this will get the correct info.
+      if (!isWasabi) {
+        try {
+          const implementationAddress = await newContract.implementation();
+          console.log("It is a proxy contract");
+          console.log(
+            "Implementation Contract Address: " + implementationAddress
+          );
+
+          let text = await axios(
+            `https://${apiNetwork}/api?module=contract&action=getabi&address=${implementationAddress}&apikey=${myApiKey}
+          `,
+            { credentials: "omit" }
+          );
+
+          if (text.data.status == 0) {
+            isWasabi = true;
+          } else {
+            isWasabi = false;
+            contractABI = JSON.parse(text.data.result);
+          }
+        } catch (err) {
+          console.log(err.message);
+          console.log("Not a proxy contract");
+        }
       }
 
       console.log(contractABI);
-      return contractABI;
+
+      if (isWasabi) {
+        return "Contract is not verified";
+      } else {
+        return contractABI;
+      }
     } catch (err) {
       if (err.message == "Unexpected token C in JSON at position 0") {
         console.log(
@@ -145,6 +162,17 @@ export async function getTokenDetails(
     console.log("Invalid address type");
     throw Error("Invalid Address");
   }
+}
+
+async function getABIWasabi(code) {
+  const abi = whatsabi.abiFromBytecode(code);
+  return abi;
+}
+
+export async function searchSignatureOnWasabi(signature) {
+  const signatureLookup = new whatsabi.loaders.SamczunSignatureLookup();
+  const res = await signatureLookup.loadFunctions(signature);
+  return res;
 }
 
 // async function test() {

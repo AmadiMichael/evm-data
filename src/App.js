@@ -54,6 +54,12 @@ export default function KnownDecoder(props) {
       );
 
       console.log(contractABI);
+      if (contractABI == "Contract is not verified") {
+        throw new Error(
+          contractABI +
+            ". You can use the Instant decoder to decode it without named parameters."
+        );
+      }
       const newInterface = new ethers.utils.Interface(contractABI);
       console.log(newInterface);
       setCurrentInterface(newInterface);
@@ -324,33 +330,13 @@ export default function KnownDecoder(props) {
           }}
         >
           <img src={securityicon} style={{ width: "2.7em", height: "2.7em" }} />
-          <h1 style={{ marginLeft: "0.5em" }}> EVM DATA </h1>
+          <h1 style={{ marginLeft: "0.5em" }}> EVM DATA DECODER</h1>
         </div>
         <div className="line" />
       </header>
-      <h5>
-        Created by{" "}
-        <a
-          href="https://twitter.com/AmadiMichaels"
-          target="_blank"
-          rel="noreferrer"
-          style={{ textDecoration: "black 1px" }}
-        >
-          @AmadiMichaels{" "}
-        </a>
-        and open source{" "}
-        <a
-          href="https://github.com/AmadiMichael/evm-data"
-          target="_blank"
-          rel="noreferrer"
-          style={{ textDecoration: "black 1px" }}
-        >
-          here
-        </a>
-      </h5>
-      <h6> Don't trust, VERIFY!</h6>
 
-      <h1> EVM Data Decoder </h1>
+      <h3> Don't trust, VERIFY!</h3>
+
       <div
         style={{
           margin: "0 3em 0 3em",
@@ -438,7 +424,7 @@ export default function KnownDecoder(props) {
                   <Loader mt={15} color="black" />
                 </Center>
 
-                <h1>Decoding... </h1>
+                <h1>Getting possible functions... </h1>
               </div>
             ) : null}
           </div>
@@ -574,6 +560,7 @@ export default function KnownDecoder(props) {
                 marginTop: "1em",
                 whiteSpace: "normal",
                 wordWrap: "break-word",
+                color: "red",
               }}
             >
               {" "}
@@ -601,7 +588,7 @@ export default function KnownDecoder(props) {
                   <Loader mt={15} color="black" />
                 </Center>
 
-                <h1>Decoding... </h1>
+                <h1>Getting possible functions... </h1>
               </div>
             ) : null}
           </div>
@@ -745,6 +732,37 @@ export default function KnownDecoder(props) {
           ) : null}
         </div>
       </div>
+      <h3> Credits </h3>
+      <h5>
+        Created by{" "}
+        <a
+          href="https://twitter.com/AmadiMichaels"
+          target="_blank"
+          rel="noreferrer"
+          style={{ textDecoration: "black 1px" }}
+        >
+          @AmadiMichaels{" "}
+        </a>
+        and open source{" "}
+        <a
+          href="https://github.com/AmadiMichael/evm-data"
+          target="_blank"
+          rel="noreferrer"
+          style={{ textDecoration: "black 1px" }}
+        >
+          here
+        </a>
+      </h5>
+      <h5>
+        <a
+          href="https://4byte.directory"
+          target="_blank"
+          rel="noreferrer"
+          style={{ textDecoration: "black 1px" }}
+        >
+          4Byte Directory API
+        </a>
+      </h5>
     </div>
   );
 }
